@@ -51,12 +51,8 @@ props.formStepData.forEach((elem) => {
  */
 
 watch(currentStep, (newCurrentStep) => {
-
     checkNextButton();
-    checkStepJumpButton();
-
-    const percentage = (newCurrentStep) / totalStep * 100;
-    stepJumpLineColorPercentage.value = percentage;
+    adjustStepJumpButton(newCurrentStep);
 })
 
 /**
@@ -79,7 +75,7 @@ function checkNextButton() {
     buttonClassName.value = valid ? 'next-button' : 'next-button-invalid';
 }
 
-function checkStepJumpButton() {
+function adjustStepJumpButton(newCurrentStep: number) {
     for(let i = 0; i < stepJumpButton.value.length; ++i) {
         if (i < currentStep.value) {
             stepJumpButton.value[i] = true;
@@ -87,6 +83,9 @@ function checkStepJumpButton() {
             stepJumpButton.value[i] = false;
         }
     }
+
+    const percentage = (newCurrentStep) / totalStep * 100;
+    stepJumpLineColorPercentage.value = percentage;
 }
 
 function submit() {
@@ -115,29 +114,15 @@ function submit() {
             />
             <!-- Navigation Buttons -->
             <div class="horizontal">
-                <button 
-                    v-if="currentStep > 0" 
-                    @click="currentStep--"
-                    class="previous-button"
-                >
+                <button v-if="currentStep > 0" @click="currentStep--" class="previous-button" >
                     Previous
                 </button>
 
-                <button 
-                    v-if="currentStep < totalStep - 1" 
-                    @click="currentStep++"
-                    :class="buttonClassName"
-                    :disabled="nextDisabled"
-                >
+                <button v-if="currentStep < totalStep - 1" @click="currentStep++" :class="buttonClassName" :disabled="nextDisabled" >
                     Next
                 </button>
 
-                <button 
-                    v-else
-                    :class="buttonClassName"
-                    :disabled="nextDisabled"
-                    @click="submit"
-                >
+                <button v-else :class="buttonClassName" :disabled="nextDisabled" @click="submit" >
                     Submit
                 </button>
             </div>
@@ -146,7 +131,9 @@ function submit() {
             <div class="vertical flex-center jump-button-line-container">
                 <div 
                     class="jump-button-line"
-                    :style="{ background: `linear-gradient(to right, #247cff ${stepJumpLineColorPercentage}%, #000 ${stepJumpLineColorPercentage}%)` }"
+                    :style="{ 
+                        background: `linear-gradient(to right, #247cff ${stepJumpLineColorPercentage}%, #000 ${stepJumpLineColorPercentage}%)` 
+                    }"
                 >
                 </div>
             </div>

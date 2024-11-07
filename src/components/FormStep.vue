@@ -23,30 +23,10 @@ function updateValue(event: string) {
 </script>
 
 <template>
-    <TextField 
-        v-if="formConfig.type=='textfield'" 
-        :formConfig="formConfig"
-        @update-value="updateValue"
-        :fieldValue="fieldValue"
-        />
-    <RadioChoice 
-        v-else-if="formConfig.type=='radio'" 
-        :formConfig="formConfig"
-        @update-value="updateValue"
-        :fieldValue="fieldValue"
-        />
-    <TextArea 
-        v-else-if="formConfig.type=='textarea'" 
-        :formConfig="formConfig"
-        @update-value="updateValue"
-        :fieldValue="fieldValue"
-        />
-    <AutocompleteField 
-        v-else-if="formConfig.type=='autocomplete'" 
-        :formConfig="formConfig"
-        @update-value="updateValue"
-        :fieldValue="fieldValue"
-        />
+    <TextField v-if="formConfig.type=='textfield'" :formConfig="formConfig" @update-value="updateValue" :fieldValue="fieldValue" />
+    <RadioChoice v-else-if="formConfig.type=='radio'" :formConfig="formConfig" @update-value="updateValue" :fieldValue="fieldValue" />
+    <TextArea v-else-if="formConfig.type=='textarea'" :formConfig="formConfig" @update-value="updateValue" :fieldValue="fieldValue" />
+    <AutocompleteField v-else-if="formConfig.type=='autocomplete'" :formConfig="formConfig" @update-value="updateValue" :fieldValue="fieldValue" />
 </template>
 
 <style scoped>
