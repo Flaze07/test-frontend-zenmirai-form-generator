@@ -11,10 +11,6 @@ const emit = defineEmits([
     'update-value'
 ]);
 
-function updateValue(event: Event) {
-    const newValue = (event.target as HTMLTextAreaElement).value;
-    emit('update-value', newValue);
-}
 </script>
 
 <template>
@@ -29,7 +25,7 @@ function updateValue(event: Event) {
             rows="4" 
             cols="50" 
             :placeholder="formConfig.placeholder" 
-            @input="updateValue" 
+            @input="(event) => emit('update-value', (event.target as HTMLInputElement).value)"
             >{{ fieldValue }}</textarea>
     </main>
 </template>

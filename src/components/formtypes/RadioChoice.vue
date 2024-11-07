@@ -15,11 +15,6 @@ const emit = defineEmits([
 const options = ref<RadioOptions[]>(props.formConfig.options as RadioOptions[]);
 const selectedOption = ref<string>(props.fieldValue);
 
-function updateValue(event: Event) {
-    const newValue = (event.target as HTMLInputElement).value;
-    emit('update-value', newValue);
-}
-
 </script>
 
 <template>
@@ -37,7 +32,7 @@ function updateValue(event: Event) {
                     :id="option.label" 
                     :name="formConfig.label" 
                     :value="option.value"
-                    @input="updateValue"
+                    @input="(event) => emit('update-value', (event.target as HTMLInputElement).value)"
                     v-model="selectedOption"
                 />
                 <label :for="option.label">

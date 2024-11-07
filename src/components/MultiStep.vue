@@ -4,7 +4,10 @@ import type FormConfig from '@/interfaces/FormConfig.interface';
 import type FormStepData from '@/interfaces/FormStepData.interface';
 import type FormInputValues from '@/interfaces/FormInputValues.interface';
 
-import FormStep from '@/components/FormStep.vue';
+// import FormStep from '@/components/FormStep.vue';
+import FormViewer from '@/components/FormViewer.vue';
+import NavigationButtons from '@/components/NavigationButtons.vue';
+import JumpButton from '@/components/JumpButton.vue';
 
 const props = defineProps<{
     formStepData: FormStepData[]
@@ -23,12 +26,12 @@ const currentStep = ref<number>(0);
 /**
  * variables related to next button
  */
-const buttonClassName = ref<string>('next-button-invalid');
 const nextDisabled = ref<boolean>(true);
 
+/**
+ * Initialize input value
+ */
 const inputValue = ref<FormInputValues[][]>([]);
-const stepJumpButton = ref<boolean[]>([]);
-const stepJumpLineColorPercentage = ref<number>(0);
 
 props.formStepData.forEach((elem) => {
     const temp: FormInputValues[] = [];
@@ -40,7 +43,6 @@ props.formStepData.forEach((elem) => {
         })
     })
 
-    stepJumpButton.value?.push(false);
     inputValue.value?.push(temp);
 })
 
@@ -52,7 +54,6 @@ props.formStepData.forEach((elem) => {
 
 watch(currentStep, (newCurrentStep) => {
     checkNextButton();
-    adjustStepJumpButton(newCurrentStep);
 })
 
 /**
@@ -72,20 +73,15 @@ function checkNextButton() {
     })
 
     nextDisabled.value = !valid;
-    buttonClassName.value = valid ? 'next-button' : 'next-button-invalid';
 }
 
-function adjustStepJumpButton(newCurrentStep: number) {
-    for(let i = 0; i < stepJumpButton.value.length; ++i) {
-        if (i < currentStep.value) {
-            stepJumpButton.value[i] = true;
-        } else {
-            stepJumpButton.value[i] = false;
-        }
+function updateStepValue(newValue: number) {
+    if (newValue >= totalStep) {
+        submit();
+        return;
     }
 
-    const percentage = (newCurrentStep) / totalStep * 100;
-    stepJumpLineColorPercentage.value = percentage;
+    currentStep.value = newValue;
 }
 
 function submit() {
@@ -105,53 +101,14 @@ function submit() {
             </p>
         </div>
         <div class="vertical form-box">
-            <FormStep 
-                v-for="(formStep, index) in props.formStepData[currentStep].fields" 
-                :key="index" 
-                :formConfig="formStep"
-                :fieldValue="inputValue[currentStep][index].value"
-                @update-value="(value: string) => updateInputValue(index, value)"
+            <FormViewer 
+                :formFields="formStepData[currentStep].fields" 
+                :formInputValues="inputValue[currentStep]"
+                @update-value="(index: number, value: string) => updateInputValue(index, value)"
             />
-            <!-- Navigation Buttons -->
-            <div class="horizontal">
-                <button v-if="currentStep > 0" @click="currentStep--" class="previous-button" >
-                    Previous
-                </button>
-
-                <button v-if="currentStep < totalStep - 1" @click="currentStep++" :class="buttonClassName" :disabled="nextDisabled" >
-                    Next
-                </button>
-
-                <button v-else :class="buttonClassName" :disabled="nextDisabled" @click="submit" >
-                    Submit
-                </button>
-            </div>
+            <NavigationButtons :currentStep="currentStep" :totalStep="totalStep" :nextDisabled="nextDisabled" @update-value="updateStepValue" />
         </div>
-        <div class="jump-button-container">
-            <div class="vertical flex-center jump-button-line-container">
-                <div 
-                    class="jump-button-line"
-                    :style="{ 
-                        background: `linear-gradient(to right, #247cff ${stepJumpLineColorPercentage}%, #000 ${stepJumpLineColorPercentage}%)` 
-                    }"
-                >
-                </div>
-            </div>
-            <div class="horizontal flex-center jump-button-internal-container">
-                <button 
-                    v-for="(elem, index) in stepJumpButton" 
-                    :key="index" 
-                    @click="() => {
-                        console.log(index)
-                        currentStep = index
-                    }"
-                    :class="(elem ? 'jump-button' : 'jump-button-disabled') + ' jump-button-base'"
-                    :disabled="!elem"
-                >
-                    {{ index + 1 }}
-                </button>
-            </div>
-        </div>
+        <JumpButton :totalStep="totalStep" :currentStep="currentStep" @update-value="updateStepValue" />
     </main>    
 </template>
 
@@ -166,77 +123,6 @@ function submit() {
     width: var(--form-width);
     margin-left: -40px;
     margin-bottom: 50px;;
-}
-
-.previous-button {
-    background-color: #bbbbbbd0;
-    color: #000;
-    padding: 10px 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-right: 10px;
-}
-
-.next-button {
-    background-color: #247cffd0;
-    color: #fff;
-    padding: 10px 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-right: 10px;
-}
-
-.next-button-invalid {
-    background-color: #c7dcfdd0;
-    color: #fff;
-    padding: 10px 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-right: 10px;
-    cursor: not-allowed;
-}
-
-.jump-button-container {
-    width: var(--form-width);
-    margin-top: 30px;
-    position: relative;
-}
-
-.jump-button-line-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.jump-button-line {
-    width: 100%;
-    height: 3px;
-}
-
-.jump-button-internal-container {
-    width: 100%;
-    gap: 10px;
-}
-
-.jump-button-base {
-    aspect-ratio: 1;
-    width: 75px;
-    border-radius: 999px;
-    z-index: 2;
-    position: relative;
-}
-
-.jump-button {
-    background-color: #247cff;
-    color: #fff;
-}
-
-.jump-button-disabled {
-    background-color: #f1f1f1;
-    color: #000;
-    cursor: not-allowed;
 }
 
 </style>
